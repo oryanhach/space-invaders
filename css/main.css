@@ -6,10 +6,6 @@
     background-color:rgba(250, 235, 215, 0.603);
 }
 
-.alien {
-    background-color: rgba(220, 20, 60, 0.568);
-}
-
 .cell {
     width: 30px;
     height: 30px;

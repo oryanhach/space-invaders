@@ -18,6 +18,8 @@ var gGame = {
 
 // Initialize the game
 function init() {
+    gAliensTopRowIdx = 0
+    gAliensBottomRowIdx = 2
     gScore = 0
     gAliensCount = 0
     gGame.isOn = true
@@ -26,6 +28,7 @@ function init() {
     createAliens(gBoard)
     renderBoard(gBoard)
     renderScore()
+    // moveAliens()
 }
 
 // Creates a board (model)
