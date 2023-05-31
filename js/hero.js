@@ -43,7 +43,7 @@ function moveHero(dir) {
     }
     if (dir === 'right') {
         // cant move past limits
-        if (nextCell.j + 1 == gBoard.length) {
+        if (nextCell.j + 1 === gBoard.length) {
             return
         } else {
             nextCell.j++
@@ -90,13 +90,12 @@ function blinkLaser(pos) {
     // Check if the laser hits an alien
     if (cell.gameObject === ALIEN) {
         updateCell(pos, '')
-        cell.gameObject = null
-        gGame.aliensCount--
+        gGame.aliensCount++
         gScore += 10
-        gAliensCount++
         renderScore()
         gHero.isShoot = false
         checkVictory()
+        cell.gameObject = null
         return
     }
 

@@ -9,7 +9,6 @@ const ALIEN = '👽'
 const LASER = '⤊'
 
 var gScore
-var gAliensCount
 var gBoard
 var gGame = {
     isOn: false,
@@ -21,14 +20,14 @@ function init() {
     gAliensTopRowIdx = 0
     gAliensBottomRowIdx = 2
     gScore = 0
-    gAliensCount = 0
+    gGame.aliensCount = 0
     gGame.isOn = true
     gBoard = createBoard(BOARD_SIZE)
     createHero(gBoard)
     createAliens(gBoard)
     renderBoard(gBoard)
     renderScore()
-    // moveAliens()
+    moveAliens()
 }
 
 // Creates a board (model)
@@ -83,10 +82,13 @@ function renderScore() {
 
 // Check if game won
 function checkVictory() {
-    if (gAliensCount === 18) {
+    if (gGame.aliensCount === 18) {
         gGame.isOn = false
         console.log('You won!')
     }
 }
 
+// TODO - Add a losing function
 // TODO - Create a win /lose modal
+// TODO - add a feature, when killing bottom line, bottom line index decrease -1
+// TODO - BUG - sometimes the laser gets more than one alien at the same time
