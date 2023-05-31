@@ -8,8 +8,8 @@ const HERO = '♆'
 const ALIEN = '👽'
 const LASER = '⤊'
 
-var gLaserInterval
-
+var gScore
+var gAliensCount
 var gBoard
 var gGame = {
     isOn: false,
@@ -18,10 +18,14 @@ var gGame = {
 
 // Initialize the game
 function init() {
+    gScore = 0
+    gAliensCount = 0
+    gGame.isOn = true
     gBoard = createBoard(BOARD_SIZE)
     createHero(gBoard)
     createAliens(gBoard)
     renderBoard(gBoard)
+    renderScore()
 }
 
 // Creates a board (model)
@@ -67,3 +71,19 @@ function updateCell(pos, gameObject = null) {
     var elCell = getElCell(pos)
     elCell.innerHTML = gameObject || ''
 }
+
+// Renders the score
+function renderScore() {
+    var elScore = document.querySelector('.score span')
+    elScore.innerText = gScore
+}
+
+// Check if game won
+function checkVictory() {
+    if (gAliensCount === 18) {
+        gGame.isOn = false
+        console.log('You won!')
+    }
+}
+
+// TODO - Create a win /lose modal

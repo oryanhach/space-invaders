@@ -1,13 +1,16 @@
 'use strict'
 
 const LASER_SPEED = 80
+
 var gHero = {
-    pos: { i: 12, j: 5 },
+    pos: { i: null, j: null },
     isShoot: false,
 }
 
 // Creates the hero and place it on the board
 function createHero(board) {
+    gHero.pos.i = 12
+    gHero.pos.j = 5
     var heroPosition = gHero.pos
     board[heroPosition.i][heroPosition.j].gameObject = HERO
 }
@@ -17,6 +20,7 @@ function createHero(board) {
 
 // Handle game keys
 function onKeyDown(ev) {
+    if (!gGame.isOn) return
 
     // Checks for movement keys
     if (ev.code === 'ArrowRight') {
@@ -65,23 +69,53 @@ function moveHero(dir) {
 }
 
 function shoot() {
-    blinkLaser(gHero.pos)
+    if (gHero.isShoot) return
+    if (!gHero.isShoot) gHero.isShoot = true
+    var currLaserPos = {
+        i: gHero.pos.i,
+        j: gHero.pos.j,
+    }
+    blinkLaser(currLaserPos)
 }
 
 function blinkLaser(pos) {
-    // display:
-    // Model
-    gBoard[pos.i][pos.j].gameObject = LASER
-    // DOM
+    
+    pos.i--
+    if (pos.i < 0) {
+        gHero.isShoot = false
+        return
+    }
+    var cell = gBoard[pos.i][pos.j]
+
+    // Check if the laser hits an alien
+    if (cell.gameObject === ALIEN) {
+        updateCell(pos, '')
+        cell.gameObject = null
+        gGame.aliensCount--
+        gScore += 10
+        gAliensCount++
+        renderScore()
+        gHero.isShoot = false
+        checkVictory()
+        return
+    }
+
+    // Check if the laser reaches the top of the board
+    if (pos.i < 0) {
+        updateCell(pos, '')
+        return
+    }
+
+    // Update the cell with the laser
+    cell.gameObject = LASER
     updateCell(pos, LASER)
 
-    // hide:
-    // setTimeout(()=>())
-    // Model
-    gBoard[pos.i][pos.j].gameObject = null
-    // DOM
-    updateCell(pos)
-
+    setTimeout(() => {
+        updateCell(pos, '') // Clear the current cell
+        blinkLaser(pos) // Continue to the next cell
+    }, LASER_SPEED)
 }
+
+
 
 
