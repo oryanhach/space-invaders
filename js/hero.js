@@ -1,120 +1,92 @@
 'use strict'
 
-const LASER_SPEED = 80
+const LASER_SPEED = 30
+var gCurrLaserPos
+var gLaserInterval
 
 var gHero = {
-    pos: { i: null, j: null },
+    pos: { i: 12, j: 5 },
     isShoot: false,
 }
 
-// Creates the hero and place it on the board
 function createHero(board) {
-    gHero.pos.i = 12
-    gHero.pos.j = 5
-    var heroPosition = gHero.pos
-    board[heroPosition.i][heroPosition.j].gameObject = HERO
+    board[gHero.pos.i][gHero.pos.j] = { type: SKY, gameObject: HERO }
 }
 
-// Self reminder \\
-// Movement mechanism: onKeyDown reads clicked key > moveHero gets next cell > updateCell renders new & old cell
-
-// Handle game keys
 function onKeyDown(ev) {
     if (!gGame.isOn) return
-
-    // Checks for movement keys
-    if (ev.code === 'ArrowRight') {
-        moveHero('right')
-    } else if (ev.code === 'ArrowLeft') {
-        moveHero('left')
+    switch (ev.key) {
+        // handle moving right
+        case 'ArrowRight':
+            moveHero(1)
+            break
+        // handle moving left
+        case 'ArrowLeft':
+            moveHero(-1)
+            break
+        // handle shooting
+        case ' ':
+            shoot()
+            break
+        default:
+            break
     }
-    // Checks for shooting key
-    if (ev.code === 'Space') {
-        shoot()
-    }
-
 }
 
-// Moves the hero
 function moveHero(dir) {
-    var nextCell = {
-        i: gHero.pos.i,
-        j: gHero.pos.j
+    // checks for edges
+    if (gHero.pos.j + dir < 0 || gHero.pos.j + dir > gBoard[0].length - 1) {
+        return
     }
-    if (dir === 'right') {
-        // cant move past limits
-        if (nextCell.j + 1 === gBoard.length) {
-            return
-        } else {
-            nextCell.j++
-        }
-    } else {
-        // cant move past limits
-        if (nextCell.j - 1 === -1) {
-            return
-        } else {
-            nextCell.j--
-        }
-    }
-
-    // removes hero from old cell
-    updateCell(gHero.pos, '')
-
-    // renders new hero location on the board
-    // DOM:
-    updateCell(nextCell, HERO)
-    // Model:
-    gHero.pos.i = nextCell.i
-    gHero.pos.j = nextCell.j
+    // removes hero from old position
+    updateCell(gHero.pos)
+    // updates hero's new location
+    gHero.pos.j += dir
+    updateCell(gHero.pos, HERO)
 }
 
 function shoot() {
-    if (gHero.isShoot) return
-    if (!gHero.isShoot) gHero.isShoot = true
-    var currLaserPos = {
-        i: gHero.pos.i,
-        j: gHero.pos.j,
+    // disables multiple lasers
+    if (!gHero.isShoot) {
+        gHero.isShoot = true
+        // laser position
+        gCurrLaserPos = { i: gHero.pos.i - 1, j: gHero.pos.j }
+        blinkLaser(gCurrLaserPos)
+        gLaserInterval = setInterval(moveLaser, LASER_SPEED)
     }
-    blinkLaser(currLaserPos)
 }
 
 function blinkLaser(pos) {
-    
-    pos.i--
-    if (pos.i < 0) {
-        gHero.isShoot = false
-        return
-    }
-    var cell = gBoard[pos.i][pos.j]
-
-    // Check if the laser hits an alien
-    if (cell.gameObject === ALIEN) {
-        updateCell(pos, '')
-        gGame.aliensCount++
-        gScore += 10
-        renderScore()
-        gHero.isShoot = false
-        checkVictory()
-        cell.gameObject = null
-        return
-    }
-
-    // Check if the laser reaches the top of the board
-    if (pos.i < 0) {
-        updateCell(pos, '')
-        return
-    }
-
-    // Update the cell with the laser
-    cell.gameObject = LASER
     updateCell(pos, LASER)
-
     setTimeout(() => {
-        updateCell(pos, '') // Clear the current cell
-        blinkLaser(pos) // Continue to the next cell
+        updateCell(pos)
     }, LASER_SPEED)
 }
 
+function moveLaser() {
+    var nextPos = { i: gCurrLaserPos.i - 1, j: gCurrLaserPos.j }
+    var isHit = handleLaserHits(nextPos)
+    updateCell(gCurrLaserPos)
+    // if hitting an alien / edge, does not render laser again
+    if (isHit) {
+        clearInterval(gLaserInterval)
+        gHero.isShoot = false
+        return
+    }
+    gCurrLaserPos = nextPos
+    updateCell(gCurrLaserPos, LASER)
+}
 
-
-
+function handleLaserHits(pos) {
+    // handle edge of the board
+    if (pos.i < 0) {
+        return true
+    }
+    // handle hitting an alien
+    if (gBoard[pos.i][pos.j].gameObject === ALIEN) {
+        // remove the alien from the board
+        handleAlienHit(pos)
+        return true
+    }
+    return false
+}

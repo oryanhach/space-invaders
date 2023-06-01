@@ -1,118 +1,124 @@
 'use strict'
 
 const ALIEN_SPEED = 500
-var gAliensTopRowIdx = 0
-var gAliensBottomRowIdx = 2
-var gAliensDirection = 'right'
-var lastDirection
 var gIntervalAliens
 
-// Freeze aliens - for testing
-var gIsAlienFreeze = false
+var gAliensTopRowIdx
+var gAliensBottomRowIdx
+var gAlienDirection = 'right'
+var gLastDirection
 
-// Creates the aliens and place them on the board
+
+// freeze aliens for testing
+var gIsAliensFreeze = false
+
 function createAliens(board) {
-    for (var i = gAliensTopRowIdx; i <= gAliensBottomRowIdx; i++) {
-        for (var j = 4; j < 10; j++) {
-            board[i][j].gameObject = ALIEN
+    for (var i = 0; i < ALIENS_ROW_COUNT; i++) {
+        for (var j = 3; j < ALIENS_ROW_LENGTH + 3; j++) {
+            board[i][j] = { type: SKY, gameObject: ALIEN }
         }
     }
-
 }
 
-// Moves the aliens one cell right
-function shiftAliensRight(board) {
-    if (gAliensDirection === 'right') {
-        lastDirection = 'right'
-        for (var i = gAliensTopRowIdx; i <= gAliensBottomRowIdx; i++) {
-            for (var j = board[i].length - 1; j >= 0; j--) {
-                if (board[i][j].gameObject === ALIEN) {
-                    if (j >= board[i].length - 1) {
-                        gAliensDirection = 'down'
-                        return
-                    }
-                    gBoard[i][j + 1].gameObject = ALIEN
-                    updateCell({ i: i, j: j + 1 }, ALIEN)
-                    gBoard[i][j].gameObject = null
-                    updateCell({ i, j })
+function handleAlienHit(pos) {
+    updateCell(pos)
+    gGame.score += 10
+    gGame.aliensCount--
+    checkVictory()
+    renderScore()
+}
+
+function moveAliensRight(board) {
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = gBoard[i].length - 1; j >= 0; j--) {
+            if (board[i][j].gameObject === ALIEN) {
+                if (j + 1 < gBoard[i].length) {
+                    board[i][j].gameObject = null
+                    board[i][j + 1].gameObject = ALIEN
+                } else {
+                    return
                 }
             }
         }
     }
+    gLastDirection = 'right'
+    renderBoard(gBoard)
 }
 
-// Moves the aliens one cell left
-function shiftAliensLeft(board) {
-    if (gAliensDirection === 'left') {
-        lastDirection = 'left'
-        for (var i = gAliensTopRowIdx; i <= gAliensBottomRowIdx; i++) {
-            for (var j = 0; j < board[i].length; j++) {
-                if (board[i][j].gameObject === ALIEN) {
-                    if (j <= 0) {
-                        gAliensDirection = 'down'
-                        return
-                    }
-                    gBoard[i][j].gameObject = null
-                    updateCell({ i, j })
-                    gBoard[i][j - 1].gameObject = ALIEN
-                    updateCell({ i: i, j: j - 1 }, ALIEN)
+function moveAliensLeft(board) {
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard[i].length; j++) {
+            if (board[i][j].gameObject === ALIEN) {
+                if (j - 1 >= 0) {
+                    board[i][j].gameObject = null
+                    board[i][j - 1].gameObject = ALIEN
+                } else {
+                    return
                 }
             }
         }
     }
+    gLastDirection = 'left'
+    renderBoard(gBoard)
 }
 
-// Moves the aliens one cell down
-function shiftAliensDown(board) {
-    if (gAliensDirection === 'down') {
-        for (var i = gAliensBottomRowIdx; i >= gAliensTopRowIdx; i--) {
-            for (var j = 0; j < board[i].length; j++) {
-                if (board[i][j].gameObject === ALIEN) {
-                    gBoard[i][j].gameObject = null
-                    updateCell({ i, j })
-                    gBoard[i + 1][j].gameObject = ALIEN
-                    updateCell({ i: i + 1, j: j }, ALIEN)
+function moveAliensDown(board) {
+    for (var i = gAliensBottomRowIdx; i >= gAliensTopRowIdx; i--) {
+        for (var j = 0; j < gBoard[i].length; j++) {
+            if (board[i][j].gameObject === ALIEN) {
+                if (i + 3 < gBoard.length) {
+                    board[i][j].gameObject = null
+                    board[i + 1][j].gameObject = ALIEN
+                } else {
+                    gameLost()
                 }
             }
-            if (lastDirection === 'right') {
-                gAliensDirection = 'left'
-            } else {
-                gAliensDirection = 'right'
-            }
         }
-        gAliensTopRowIdx++
-        gAliensBottomRowIdx++
-        if (gAliensBottomRowIdx >= BOARD_SIZE - 2) {
-            gGame.isOn = false
-        }
-        console.log(gAliensBottomRowIdx)
-
     }
+    gAliensTopRowIdx++
+    gAliensBottomRowIdx++
+    renderBoard(gBoard)
 }
 
-function getDirection() {
-    if (gIsAlienFreeze) return
-    if (gGame.isOn) {
-        switch (gAliensDirection) {
-            case 'right':
-                shiftAliensRight(gBoard)
-                break
-            case 'left':
-                shiftAliensLeft(gBoard)
-                break
-            case 'down':
-                shiftAliensDown(gBoard)
-                break
-            default:
-                break
-        }
-
-    }
-}
-
-// Starts the aliens moving interval
 function moveAliens() {
+    if (gIsAliensFreeze || !gGame.isOn) return
     gIntervalAliens = setInterval(() => {
-        getDirection()
+        if (gAlienDirection === 'right') {
+            moveAliensRight(gBoard)
+            if (checkRightEdge()) {
+                gAlienDirection = 'down'
+            }
+        } else if (gAlienDirection === 'down') {
+            moveAliensDown(gBoard)
+            if (gLastDirection === 'right') {
+                gAlienDirection = 'left'
+            } else {
+                gAlienDirection = 'right'
+            }
+        } else if (gAlienDirection === 'left') {
+            moveAliensLeft(gBoard)
+            if (checkLeftEdge()) {
+                gAlienDirection = 'down'
+            }
+        }
     }, ALIEN_SPEED)
 }
+
+function checkRightEdge() {
+    for (var i = 0; i < gBoard.length; i++) {
+        if (gBoard[i][gBoard[i].length - 1].gameObject === ALIEN) {
+            return true
+        }
+    }
+    return false
+}
+
+function checkLeftEdge() {
+    for (var i = 0; i < gBoard.length; i++) {
+        if (gBoard[i][0].gameObject === ALIEN) {
+            return true
+        }
+    }
+    return false
+}
+

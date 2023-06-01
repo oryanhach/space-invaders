@@ -1,0 +1,21 @@
+.cell {
+    height: 30px;
+    width: 30px;
+}
+
+.sky {
+    background-color: rgb(183, 242, 250);
+}
+
+.earth {
+    background-color: blanchedalmond;
+}
+
+.board-container {}
+
+.score {}
+
+.restart-btn {}
+
+.restart-btn:hover {}
+
