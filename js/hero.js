@@ -1,12 +1,15 @@
 'use strict'
 
-const LASER_SPEED = 30
+const LASER_SPEED = 80
 var gCurrLaserPos
 var gLaserInterval
 
 var gHero = {
     pos: { i: 12, j: 5 },
     isShoot: false,
+    isNegsKiller: false,
+    isSuper: false,
+    superNum: 3
 }
 
 function createHero(board) {
@@ -14,7 +17,7 @@ function createHero(board) {
 }
 
 function onKeyDown(ev) {
-    if (!gGame.isOn) return
+    if (!gGame.isOn || gGame.isPaused) return
     switch (ev.key) {
         // handle moving right
         case 'ArrowRight':
@@ -28,6 +31,14 @@ function onKeyDown(ev) {
         case ' ':
             shoot()
             break
+        case 'n':
+            gHero.isNegsKiller = true
+            showNegsKiller()
+            break
+        case 'x':
+            if (gHero.superNum > 0) {
+                gHero.isSuper = true
+            }
         default:
             break
     }
@@ -46,13 +57,21 @@ function moveHero(dir) {
 }
 
 function shoot() {
+    if (!gHero.isSuper && !gHero.isShoot) LASER = '🔺'
     // disables multiple lasers
     if (!gHero.isShoot) {
         gHero.isShoot = true
         // laser position
         gCurrLaserPos = { i: gHero.pos.i - 1, j: gHero.pos.j }
         blinkLaser(gCurrLaserPos)
-        gLaserInterval = setInterval(moveLaser, LASER_SPEED)
+        if (gHero.isSuper) {
+            LASER = '🔶'
+            gLaserInterval = setInterval(moveLaser, LASER_SPEED / 3)
+            gHero.superNum--
+            gHero.isSuper = false
+        } else {
+            gLaserInterval = setInterval(moveLaser, LASER_SPEED)
+        }
     }
 }
 
@@ -90,3 +109,6 @@ function handleLaserHits(pos) {
     }
     return false
 }
+
+
+

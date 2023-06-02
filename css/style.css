@@ -11,6 +11,11 @@
     background-color: blanchedalmond;
 }
 
+table{
+    border-collapse: collapse;
+    /* made by Adam ;) */
+    /* you made me freak out for a second :) */
+}
 .board-container {}
 
 .score {}
@@ -19,3 +24,8 @@
 
 .restart-btn:hover {}
 
+.stop-btn {}
+
+.modal-container {}
+
+.modal {}

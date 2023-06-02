@@ -10,13 +10,19 @@
 </head>
 
 <body onload="onInit()" onkeydown="onKeyDown(event)">
+    <div class="modal-container">
+        <div class="modal"><span></span></div>
+    </div>
     <div class="score">Score: <span>0</span></div>
+    <div class="negs-killer-display">Negs Killer: <span>OFF</span></div>
     <div class="board-container"></div>
     <button class="restart-btn" onclick="setNewGame()">Start</button>
+    <button class="pause-btn" onclick="pauseGame()">Stop</button>
+    <button class="freeze-btn" onclick="freezeAliens()">Freeze</button>
 
     <script src="js/game.js"></script>
     <script src="js/hero.js"></script>
-    <script src="js/alien.js"></script> 
+    <script src="js/alien.js"></script>
     <script src="js/utils.js"></script>
 </body>
 

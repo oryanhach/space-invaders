@@ -21,11 +21,36 @@ function createAliens(board) {
 }
 
 function handleAlienHit(pos) {
+    if (gHero.isNegsKiller) {
+        blowUpNegs(pos)
+    }
     updateCell(pos)
     gGame.score += 10
     gGame.aliensCount--
     checkVictory()
     renderScore()
+}
+
+function blowUpNegs(pos) {
+    for (var i = pos.i - 1; i <= pos.i + 1; i++) {
+        if (i < 0 || i >= gBoard.length) continue
+        for (var j = pos.j - 1; j <= pos.j + 1; j++) {
+            if (i === pos.i && j === pos.j) continue
+            if (j < 0 || j >= gBoard[0].length) continue
+            var currCell = gBoard[i][j]
+            var currPos = { i: i, j: j }
+            if (currCell.gameObject === ALIEN) {
+                updateCell(currPos)
+                gGame.score += 10
+                gGame.aliensCount--
+                renderScore()
+            }
+        }
+    }
+    gHero.isNegsKiller = false
+    removeNegsKiller()
+    checkVictory()
+    return
 }
 
 function moveAliensRight(board) {
@@ -71,6 +96,7 @@ function moveAliensDown(board) {
                     board[i + 1][j].gameObject = ALIEN
                 } else {
                     gameLost()
+                    return
                 }
             }
         }
@@ -122,3 +148,27 @@ function checkLeftEdge() {
     return false
 }
 
+function freezeAliens() {
+    if (!gGame.isOn) return
+    if (!gIsAliensFreeze) {
+        gIsAliensFreeze = true
+        clearInterval(gIntervalAliens)
+        getUnfreezeButton()
+    } else {
+        gIsAliensFreeze = false
+        moveAliens()
+        getFreezeButton()
+    }
+
+
+}
+
+function getUnfreezeButton() {
+    var elButton = document.querySelector('.freeze-btn')
+    elButton.innerText = 'Unfreeze'
+}
+
+function getFreezeButton() {
+    var elButton = document.querySelector('.freeze-btn')
+    elButton.innerText = 'Freeze'
+}

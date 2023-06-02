@@ -6,15 +6,16 @@ const ALIENS_ROW_COUNT = 3
 
 const HERO = '🤖'
 const ALIEN = '👾'
-const LASER = '🔺'
+var LASER = '🔺'
 const SKY = 'SKY'
 const EARTH = 'EARTH'
 
 var gBoard
 var gGame = {
     isOn: false,
+    isPaused: false,
     aliensCount: 24,
-    score: 0
+    score: 0,
 }
 
 function onInit() {
@@ -26,6 +27,10 @@ function onInit() {
     gAliensTopRowIdx = 0
     gAliensBottomRowIdx = 2
     gAlienDirection = 'right'
+    gIsAliensFreeze = false
+    gHero.isNegsKiller = false
+    gHero.isSuper = false
+    gHero.superNum = 3
     clearInterval(gIntervalAliens)
     createHero(gBoard)
     createAliens(gBoard)
@@ -75,6 +80,8 @@ function checkVictory() {
         clearInterval(gIntervalAliens)
         console.log('You Win!')
         getStartButton()
+        getFreezeButton()
+        getVictoryModal()
     }
 }
 
@@ -84,6 +91,7 @@ function gameLost() {
     clearInterval(gIntervalAliens)
     console.log('You Lost!')
     getStartButton()
+    getFreezeButton()
 }
 
 function renderScore() {
@@ -92,8 +100,12 @@ function renderScore() {
 }
 
 function setNewGame() {
-    gGame.isOn = true
     getRestartButton()
+    getFreezeButton()
+    removeNegsKiller()
+    if (gGame.isPaused) getStopButton()
+    gGame.isOn = true
+    gGame.isPaused = false
     onInit()
 }
 
@@ -107,16 +119,58 @@ function getStartButton() {
     elButton.innerText = 'Start'
 }
 
+function pauseGame() {
+    if (gGame.isOn && !gGame.isPaused) {
+        gGame.isPaused = true
+        clearInterval(gIntervalAliens)
+        clearInterval(gLaserInterval)
+        getContinueButton()
+    } else if (gGame.isOn && gGame.isPaused) {
+        gGame.isPaused = false
+        if (gHero.isShoot) {
+            gLaserInterval = setInterval(moveLaser, LASER_SPEED)
+        }
+        moveAliens()
+        getStopButton()
+    }
+}
 
-// TODO - go over the code, make it cleaner and check for duplicated code /inconsistent logic
-// TODO - small bug - when losing, the first row of aliens is removed
-// TODO - add freeze aliens button - trigger gIsAliensFreeze
-// TODO - add victory / losing modal
-// TODO - add blow up neighbors feature
-// TODO - add Super mode feature
+function getContinueButton() {
+    var elButton = document.querySelector('.pause-btn')
+    elButton.innerText = 'Continue'
+}
+
+function getStopButton() {
+    var elButton = document.querySelector('.pause-btn')
+    elButton.innerText = 'Stop'
+}
+
+function getVictoryModal() {
+    var elModal = document.querySelector('.modal span')
+    elModal.innerText = 'You Won!'
+}
+
+function getLosingModal() {
+    var elModal = document.querySelector('.modal span')
+    elModal.innerText = 'You Lost!'
+}
+
+function showNegsKiller() {
+    var elDisplay = document.querySelector('.negs-killer-display span')
+    elDisplay.innerText = 'ON'
+}
+
+function removeNegsKiller() {
+    var elDisplay = document.querySelector('.negs-killer-display span')
+    elDisplay.innerText = 'OFF'
+}
+
+// TODO - show super attacks count
 // TODO - add the design
+// TODO - (BACKUP FIRST) - go over the code, make it cleaner and check for duplicated code /inconsistent logic
 // TODO - work on bonus tasks
 // TODO - add sound effects
+// TODO - scan using Embold
 // TODO - if extra time - work on extra bonus (under 'go extreme section') features
 // TODO - if extra time - work on high score - by time to victory > learn how to save scores
 
