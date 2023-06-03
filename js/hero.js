@@ -39,6 +39,7 @@ function onKeyDown(ev) {
             if (gHero.superNum > 0) {
                 gHero.isSuper = true
             }
+            break
         default:
             break
     }

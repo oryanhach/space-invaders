@@ -194,18 +194,3 @@ function renderSuperAttacks() {
     var elDisplay = document.querySelector('.super-attack span')
     elDisplay.innerText = gHero.superNum
 }
-
-// TODO - add media queries *it looks good on my first monitor, not so good on the other*
-// TODO - Aliens Variety
-// TODO - Levels
-// TODO - Super mode again
-// TODO - Shields
-// TODO - Bunkers
-// TODO - Customize
-// TODO - Lives + Aliens Shoot
-// TODO - (BACKUP FIRST) - go over the code, make it cleaner and check for duplicated code /inconsistent logic
-// TODO - add sound effects
-// TODO - scan using Embold
-// TODO - if extra time - work on high score - by time to victory > learn how to save scores
-
-// TODO - only if extra time, try again fixing the bug - sometimes the laser catch 2 aliens / dont register hits at all
