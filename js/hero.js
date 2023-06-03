@@ -68,6 +68,7 @@ function shoot() {
             LASER = '🔶'
             gLaserInterval = setInterval(moveLaser, LASER_SPEED / 3)
             gHero.superNum--
+            renderSuperAttacks()
             gHero.isSuper = false
         } else {
             gLaserInterval = setInterval(moveLaser, LASER_SPEED)
@@ -76,7 +77,11 @@ function shoot() {
 }
 
 function blinkLaser(pos) {
-    updateCell(pos, LASER)
+    if (gHero.isSuper) {
+        updateCell(pos, '🔶')
+    } else {
+        updateCell(pos, LASER)
+    }
     setTimeout(() => {
         updateCell(pos)
     }, LASER_SPEED)
@@ -99,12 +104,29 @@ function moveLaser() {
 function handleLaserHits(pos) {
     // handle edge of the board
     if (pos.i < 0) {
+        if (gHero.isNegsKiller) {
+            gHero.isNegsKiller = false
+            removeNegsKiller()
+        }
         return true
     }
     // handle hitting an alien
     if (gBoard[pos.i][pos.j].gameObject === ALIEN) {
         // remove the alien from the board
         handleAlienHit(pos)
+        return true
+    }
+    // handle candies
+    if (gBoard[pos.i][pos.j].gameObject === CANDY) {
+        gGame.score += 50
+        renderScore()
+        updateCell(pos)
+        gIsAliensFreeze = true
+        clearInterval(gIntervalAliens)
+        setTimeout(() => {
+            gIsAliensFreeze = false
+            moveAliens()
+        }, 5000)
         return true
     }
     return false

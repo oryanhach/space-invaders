@@ -6,9 +6,9 @@ const ALIENS_ROW_COUNT = 3
 
 const HERO = '🤖'
 const ALIEN = '👾'
-var LASER = '🔺'
 const SKY = 'SKY'
 const EARTH = 'EARTH'
+var LASER = '🔺'
 
 var gBoard
 var gGame = {
@@ -31,6 +31,7 @@ function onInit() {
     gHero.isNegsKiller = false
     gHero.isSuper = false
     gHero.superNum = 3
+    hideModal()
     clearInterval(gIntervalAliens)
     createHero(gBoard)
     createAliens(gBoard)
@@ -78,7 +79,7 @@ function checkVictory() {
         gGame.isOn = false
         clearInterval(gLaserInterval)
         clearInterval(gIntervalAliens)
-        console.log('You Win!')
+        clearInterval(gCandyInterval)
         getStartButton()
         getFreezeButton()
         getVictoryModal()
@@ -89,9 +90,10 @@ function gameLost() {
     gGame.isOn = false
     clearInterval(gLaserInterval)
     clearInterval(gIntervalAliens)
-    console.log('You Lost!')
+    clearInterval(gCandyInterval)
     getStartButton()
     getFreezeButton()
+    getLosingModal()
 }
 
 function renderScore() {
@@ -100,13 +102,20 @@ function renderScore() {
 }
 
 function setNewGame() {
-    getRestartButton()
     getFreezeButton()
     removeNegsKiller()
+    clearInterval(gCandyInterval)
     if (gGame.isPaused) getStopButton()
     gGame.isOn = true
     gGame.isPaused = false
+    if (!gCandyInterval) {
+        getCandy()
+    } else {
+        clearInterval(gCandyInterval)
+        getCandy()
+    }
     onInit()
+    getRestartButton()
 }
 
 function getRestartButton() {
@@ -124,6 +133,7 @@ function pauseGame() {
         gGame.isPaused = true
         clearInterval(gIntervalAliens)
         clearInterval(gLaserInterval)
+        clearInterval(gCandyInterval)
         getContinueButton()
     } else if (gGame.isOn && gGame.isPaused) {
         gGame.isPaused = false
@@ -131,6 +141,9 @@ function pauseGame() {
             gLaserInterval = setInterval(moveLaser, LASER_SPEED)
         }
         moveAliens()
+        gCandyInterval = setInterval(() => {
+            createCandy()
+        }, 10000)
         getStopButton()
     }
 }
@@ -146,32 +159,53 @@ function getStopButton() {
 }
 
 function getVictoryModal() {
-    var elModal = document.querySelector('.modal span')
-    elModal.innerText = 'You Won!'
+    var elModalSpan = document.querySelector('.modal span')
+    elModalSpan.innerText = `You Won! Your score is: ${gGame.score}.`
+    var elModal = document.querySelector('.modal-container')
+    elModal.style.display = 'block'
 }
 
 function getLosingModal() {
-    var elModal = document.querySelector('.modal span')
-    elModal.innerText = 'You Lost!'
+    var elModalSpan = document.querySelector('.modal span')
+    elModalSpan.innerText = `You Lost! Your score is: ${gGame.score}.`
+    var elModal = document.querySelector('.modal-container')
+    elModal.style.display = 'block'
+}
+
+function hideModal() {
+    var elModal = document.querySelector('.modal-container')
+    elModal.style.display = 'none'
+
 }
 
 function showNegsKiller() {
     var elDisplay = document.querySelector('.negs-killer-display span')
     elDisplay.innerText = 'ON'
+    elDisplay.classList.add('negs-killer-on')
 }
 
 function removeNegsKiller() {
     var elDisplay = document.querySelector('.negs-killer-display span')
     elDisplay.innerText = 'OFF'
+    elDisplay.classList.remove('negs-killer-on')
 }
 
-// TODO - show super attacks count
-// TODO - add the design
+function renderSuperAttacks() {
+    var elDisplay = document.querySelector('.super-attack span')
+    elDisplay.innerText = gHero.superNum
+}
+
+// TODO - add media queries *it looks good on my first monitor, not so good on the other*
+// TODO - Aliens Variety
+// TODO - Levels
+// TODO - Super mode again
+// TODO - Shields
+// TODO - Bunkers
+// TODO - Customize
+// TODO - Lives + Aliens Shoot
 // TODO - (BACKUP FIRST) - go over the code, make it cleaner and check for duplicated code /inconsistent logic
-// TODO - work on bonus tasks
 // TODO - add sound effects
 // TODO - scan using Embold
-// TODO - if extra time - work on extra bonus (under 'go extreme section') features
 // TODO - if extra time - work on high score - by time to victory > learn how to save scores
 
 // TODO - only if extra time, try again fixing the bug - sometimes the laser catch 2 aliens / dont register hits at all

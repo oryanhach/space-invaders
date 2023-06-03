@@ -149,7 +149,7 @@ function checkLeftEdge() {
 }
 
 function freezeAliens() {
-    if (!gGame.isOn) return
+    if (!gGame.isOn || gGame.isPaused) return
     if (!gIsAliensFreeze) {
         gIsAliensFreeze = true
         clearInterval(gIntervalAliens)
